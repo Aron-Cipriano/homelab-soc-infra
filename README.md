@@ -65,13 +65,13 @@ Cada VM tem duas placas de rede: a primeira em NAT, para acesso à internet, e a
 ## Evidências
 
 ### Painel do Zabbix
-![Dashboard do Zabbix](imagens/zabbix-dashboard.png)
+![Dashboard do Zabbix](Imagens/zabbix-dashboard.png)
 
 ### Hosts monitorados
-![Hosts no Zabbix](imagens/zabbix-hosts.png)
+![Hosts no Zabbix](Imagens/zabbix-hosts.png)
 
 ### Dados coletados da vm-agente
-![Latest data da vm-agente](imagens/zabbix-latest-data.png)
+![Latest data da vm-agente](Imagens/zabbix-latest-data.png)
 
 ## Próximos passos
 
