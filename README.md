@@ -47,7 +47,7 @@ Cada VM tem duas placas de rede: a primeira em NAT, para acesso à internet, e a
 - [x] VM base com Ubuntu Server e snapshot
 - [x] Rede Host-Only e clones (`vm-zabbix`, `vm-agente`)
 - [x] SSH funcionando e ping entre as VMs
-- [ ] Zabbix server na `vm-zabbix` e agente na `vm-agente`
+- [x] Zabbix server na `vm-zabbix` e agente na `vm-agente`
 - [ ] Grafana com dashboards de CPU, memória, disco e rede
 - [ ] Suricata com leitura de `eve.json` e regras Sigma
 - [ ] Wazuh com alertas analisados e mapeados no MITRE ATT&CK
@@ -61,6 +61,17 @@ Cada VM tem duas placas de rede: a primeira em NAT, para acesso à internet, e a
 4. Ative o Adaptador 2 em Host-Only e crie os clones com novos endereços MAC.
 5. Em cada clone, ajuste o hostname e gere um novo `machine-id`.
 6. Teste o SSH a partir do host e o `ping` entre as VMs.
+
+## Evidências
+
+### Painel do Zabbix
+![Dashboard do Zabbix](imagens/zabbix-dashboard.png)
+
+### Hosts monitorados
+![Hosts no Zabbix](imagens/zabbix-hosts.png)
+
+### Dados coletados da vm-agente
+![Latest data da vm-agente](imagens/zabbix-latest-data.png)
 
 ## Próximos passos
 
