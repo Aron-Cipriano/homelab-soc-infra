@@ -27,16 +27,30 @@ Home lab de monitoramento e detecção rodando em VMs leves no VirtualBox. O obj
 ## Topologia
 
 ```mermaid
-graph LR
-    NET["Internet (NAT)"]
-    HOST["Host Windows (VirtualBox)"]
-    ZBX["vm-zabbix<br/>192.168.56.101<br/>Zabbix server + Grafana"]
-    AGT["vm-agente<br/>192.168.56.103<br/>Zabbix Agent 2"]
+flowchart LR
+    NET["Internet via NAT"]
+    HOST["Host Windows com VirtualBox"]
+    ZBX["vm-zabbix 192.168.56.101 - Zabbix server e Grafana"]
+    AGT["vm-agente 192.168.56.103 - Zabbix Agent 2"]
     NET --- ZBX
     NET --- AGT
-    HOST ---|"Host-Only 192.168.56.0/24"| ZBX
-    HOST ---|"Host-Only 192.168.56.0/24"| AGT
-    ZBX ---|"10050 / 10051"| AGT
+    HOST ---|"Host-Only"| ZBX
+    HOST ---|"Host-Only"| AGT
+    ZBX ---|"portas 10050 e 10051"| AGT
+```
+
+Se o diagrama acima não aparecer no seu leitor de Markdown, esta é a mesma topologia em texto:
+
+```
+Windows (Ryzen 3 3200G, 16 GB) + VirtualBox 7.2.22
+ ├─ vm-zabbix  192.168.56.101  (4 GB, 2 vCPU)
+ │    Apache + PHP-FPM → painel Zabbix (/zabbix)
+ │    Zabbix server → MariaDB
+ │    Grafana :3000 → API do Zabbix
+ └─ vm-agente  192.168.56.103  (2 GB, 1 vCPU)
+      Zabbix Agent 2 :10050
+
+Redes: NAT (internet) + Host-Only 192.168.56.0/24 (lab e acesso do host)
 ```
 
 Cada VM tem duas placas de rede: a primeira em NAT, para acesso à internet, e a segunda em Host-Only, para o tráfego do lab e o acesso do host.
@@ -108,8 +122,8 @@ sudo systemctl start zabbix-agent2
 
 | Métrica | Valor |
 |---|---|
-| Tempo até a detecção | 2 minutos |
-| Duração do problema | 5 minutos (Monitoring → Problems → History) |
+| Tempo até a detecção | _preencher_ |
+| Duração do problema | _preencher_ (Monitoring → Problems → History) |
 
 | Antes | Durante | Depois |
 |---|---|---|
