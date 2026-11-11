@@ -95,6 +95,12 @@ O Grafana acessa o Zabbix com um **usuário de serviço dedicado** (`grafana-use
 
 As senhas padrão do Admin do Zabbix e do admin do Grafana foram alteradas.
 
+## Suricata (IDS)
+- Versão 8.0.3 na vm-agente, modo IDS, AF_PACKET na `enp0s8` (Host-Only)
+- Regras ET Open via `suricata-update`: 69.354 no total, 53.383 ativas; carga em ~19 s, ~424 MB de RAM
+- `HOME_NET: 192.168.56.0/24`; `EXTERNAL_NET: "any"` por decisão de laboratório (ver write-up 02)
+- Write-ups: [01 – resposta com privilégio de root](writeups/01-suricata-id-root.md) · [02 – varredura interna](writeups/02-suricata-varredura-nmap.md)
+
 ### Dashboard "Homelab - Visão Geral"
 
 Arquivo: [`grafana/dashboards/homelab-visao-geral.json`](grafana/dashboards/homelab-visao-geral.json)
@@ -228,7 +234,7 @@ O Zabbix não marca o agente como indisponível na primeira falha: ele faz novas
 - [x] Grafana com dashboards de CPU, memória, disco, rede, disponibilidade e problemas
 - [x] Teste de detecção da queda do agente, com prints
 - [x] IPs fixos, DHCP da Host-Only desligado e MACs únicos
-- [ ] Suricata na vm-agente com regras ET Open e leitura do `eve.json`
+- [x] Suricata na vm-agente com regras ET Open e leitura do `eve.json`
 - [ ] Regras Sigma
 - [ ] Wazuh com alertas analisados e mapeados no MITRE ATT&CK
 - [ ] Write-ups dos testes e dos alertas
