@@ -1,0 +1,28 @@
+<!--
+  Regras locais do Wazuh - homelab-soc-infra
+  Arquivo no Manager: /var/ossec/etc/rules/local_rules.xml
+  Faixa 100000-120000 reservada para regras locais.
+  Testar antes de aplicar: /var/ossec/bin/wazuh-analysisd -t  e  /var/ossec/bin/wazuh-logtest
+-->
+
+<group name="local,suricata,">
+
+  <!--
+    100100 - Prioriza alertas do Suricata que indicam a saída do comando "id" com root no tráfego.
+    Motivo: a regra padrão do Wazuh (86601) dá nível 3 e nenhum mapeamento MITRE a todo alerta do Suricata.
+    SIDs: 2100498 (GPL ATTACK_RESPONSE id check returned root)
+          2019284 (ET ATTACK_RESPONSE Output of id command from HTTP server)
+    Comparação pelo ID da assinatura: o ID não muda entre versões das regras; o nome pode mudar.
+    Validação: write-up 04.
+  -->
+  <rule id="100100" level="10">
+    <if_sid>86601</if_sid>
+    <field name="alert.signature_id">^2100498$|^2019284$</field>
+    <description>Suricata: saida do comando id com privilegio de root no trafego (possivel pos-exploracao) - $(alert.signature)</description>
+    <mitre>
+      <id>T1033</id>
+    </mitre>
+    <group>pos_exploracao,</group>
+  </rule>
+
+</group>

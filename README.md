@@ -111,6 +111,9 @@ As senhas padrão do Admin do Zabbix e do admin do Grafana foram alteradas.
 - Wazuh Agent 4.14.10 na vm-agente (Ubuntu 26.04), cadastrado no Manager pelas portas 1515 (enrollment) e 1514 (eventos)
 - O agente lê o `eve.json` do Suricata (`<localfile>` com `log_format` json); os alertas aparecem no Dashboard com `rule.groups:suricata`
 - Ajuste de boot: `TimeoutStartSec=300` e `After=wazuh-indexer.service` em um override do systemd para o `wazuh-manager`
+   - Regra local 100100 ([wazuh/rules/local_rules.xml](wazuh/rules/local_rules.xml)): alertas do Suricata com a saída do comando `id` com root (SIDs 2100498 e 2019284) passam do nível 3 para o 10, com mapeamento MITRE T1033
+   - Rootcheck: checagem de trojans desativada na vm-agente por falso positivo confirmado com o `rust-coreutils` (ver write-up 03)
+   - Atraso observado entre a detecção e o alerta visível no Dashboard: cerca de 1 a 2 minutos
 
 ### Dashboard "Homelab - Visão Geral"
 
