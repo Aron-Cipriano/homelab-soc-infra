@@ -101,6 +101,14 @@ As senhas padrão do Admin do Zabbix e do admin do Grafana foram alteradas.
 - `HOME_NET: 192.168.56.0/24`; `EXTERNAL_NET: "any"` por decisão de laboratório (ver write-up 02)
 - Write-ups: [01 – resposta com privilégio de root](writeups/01-suricata-id-root.md) · [02 – varredura interna](writeups/02-suricata-varredura-nmap.md)
 
+## Wazuh (SIEM)
+- Versão 4.14.10, instalação all-in-one (Indexer, Manager e Dashboard) na vm-wazuh (192.168.56.110)
+- Ubuntu Server 24.04.5 LTS (o Wazuh 4.14 não suporta oficialmente o 26.04 usado nas outras VMs)
+- 2 vCPU, 6 GB de RAM, 50 GB de disco, swap de 2 GB com `vm.swappiness=10`
+- Heap do Indexer ajustado de 1 GB (padrão do instalador) para 2 GB em `/etc/wazuh-indexer/jvm.options`
+- Repositório APT do Wazuh desativado após a instalação, para evitar atualizações acidentais
+- Credenciais fora do repositório
+
 ### Dashboard "Homelab - Visão Geral"
 
 Arquivo: [`grafana/dashboards/homelab-visao-geral.json`](grafana/dashboards/homelab-visao-geral.json)
@@ -212,6 +220,22 @@ O Zabbix não marca o agente como indisponível na primeira falha: ele faz novas
 - **Sintoma:** o Windows estava com `192.168.56.102` na Host-Only, recebido pelo DHCP do VirtualBox.
 - **Risco:** desligar o DHCP cortaria o acesso do host às VMs.
 - **Correção:** adaptador do host fixado em `192.168.56.1` antes de desligar o DHCP.
+
+### 10. VM criada sem a placa Host-Only
+- **Sintoma:** `connection refused` e depois nenhum IP na rede do lab; a `enp0s8` não existia.
+- **Causa:** o Adaptador 2 não foi ativado na criação da VM, e o OpenSSH não estava ativo.
+- **Correção:** placa ativada com a VM desligada, IP temporário pelo console, netplan permanente e `systemctl enable --now ssh`.
+
+### 11. Disco e memória abaixo do planejado
+- **Sintoma:** `/` com 25 GB num disco de 50 GB; VM com 4 GB de RAM e sem swap.
+- **Causa:** o instalador criou a partição com metade do disco; a memória ficou com o valor padrão da criação.
+- **Correção:** `growpart` e `resize2fs` com a VM ligada; `modifyvm --memory 6144`; swap de 2 GB.
+
+### 12. Dashboard do Wazuh com erro 500 depois da troca de senha
+- **Sintoma:** o Dashboard respondia "Internal Server Error" (500).
+- **Investigação:** o Indexer estava `green` e aceitava o admin com a senha nova; o log do Dashboard mostrava "Authentication Exception" ao validar a sessão.
+- **Causa:** o navegador ainda enviava o cookie de sessão criado com a senha antiga. A senha do `admin` é reservada e só pode ser trocada com o `wazuh-passwords-tool.sh`.
+- **Correção:** cookies do site apagados e novo login; conferência do Filebeat com `filebeat test output`.
 
 ## Práticas aplicadas
 
