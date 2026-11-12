@@ -108,6 +108,9 @@ As senhas padrão do Admin do Zabbix e do admin do Grafana foram alteradas.
 - Heap do Indexer ajustado de 1 GB (padrão do instalador) para 2 GB em `/etc/wazuh-indexer/jvm.options`
 - Repositório APT do Wazuh desativado após a instalação, para evitar atualizações acidentais
 - Credenciais fora do repositório
+- Wazuh Agent 4.14.10 na vm-agente (Ubuntu 26.04), cadastrado no Manager pelas portas 1515 (enrollment) e 1514 (eventos)
+- O agente lê o `eve.json` do Suricata (`<localfile>` com `log_format` json); os alertas aparecem no Dashboard com `rule.groups:suricata`
+- Ajuste de boot: `TimeoutStartSec=300` e `After=wazuh-indexer.service` em um override do systemd para o `wazuh-manager`
 
 ### Dashboard "Homelab - Visão Geral"
 
@@ -236,6 +239,12 @@ O Zabbix não marca o agente como indisponível na primeira falha: ele faz novas
 - **Investigação:** o Indexer estava `green` e aceitava o admin com a senha nova; o log do Dashboard mostrava "Authentication Exception" ao validar a sessão.
 - **Causa:** o navegador ainda enviava o cookie de sessão criado com a senha antiga. A senha do `admin` é reservada e só pode ser trocada com o `wazuh-passwords-tool.sh`.
 - **Correção:** cookies do site apagados e novo login; conferência do Filebeat com `filebeat test output`.
+
+### 13. Wazuh Manager falhando no boot
+- **Sintoma:** agente com "Unable to connect to enrollment service" na porta 1515; `wazuh-manager` em estado `failed`.
+- **Investigação:** rede ok (ping) e firewall inativo; o `journalctl` mostrou "start operation timed out".
+- **Causa:** no boot, o Manager e o Indexer iniciavam juntos disputando 2 vCPUs, e o Manager estourava o prazo do systemd.
+- **Correção:** override do systemd com `TimeoutStartSec=300` e início depois do Indexer.
 
 ## Práticas aplicadas
 
