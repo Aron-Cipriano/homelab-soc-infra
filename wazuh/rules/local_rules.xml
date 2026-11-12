@@ -2,17 +2,16 @@
   Regras locais do Wazuh - homelab-soc-infra
   Arquivo no Manager: /var/ossec/etc/rules/local_rules.xml
   Faixa 100000-120000 reservada para regras locais.
-  Testar antes de aplicar: /var/ossec/bin/wazuh-analysisd -t  e  /var/ossec/bin/wazuh-logtest
+  Deploy: scp para a vm-wazuh, copiar para /var/ossec/etc/rules/, validar com wazuh-analysisd -t e reiniciar o wazuh-manager.
 -->
 
 <group name="local,suricata,">
 
   <!--
-    100100 - Prioriza alertas do Suricata que indicam a saída do comando "id" com root no tráfego.
-    Motivo: a regra padrão do Wazuh (86601) dá nível 3 e nenhum mapeamento MITRE a todo alerta do Suricata.
+    100100 - Saída do comando "id" com root no tráfego (possível pós-exploração).
+    A regra padrão do Wazuh (86601) dá nível 3 e nenhum mapeamento MITRE a todo alerta do Suricata.
     SIDs: 2100498 (GPL ATTACK_RESPONSE id check returned root)
           2019284 (ET ATTACK_RESPONSE Output of id command from HTTP server)
-    Comparação pelo ID da assinatura: o ID não muda entre versões das regras; o nome pode mudar.
     Validação: write-up 04.
   -->
   <rule id="100100" level="10">
@@ -23,6 +22,37 @@
       <id>T1033</id>
     </mitre>
     <group>pos_exploracao,</group>
+  </rule>
+
+  <!--
+    100101 - Varredura de rede: assinaturas ET SCAN observadas nos testes com nmap (write-up 02 e write-up 05).
+    SIDs: 2001219 (Potential SSH Scan)          2003068 (Potential SSH Scan OUTBOUND)
+          2002910 (Potential VNC Scan 5800-5820) 2018489 (NMAP OS Detection Probe)
+          2010935 (MSSQL 1433)  2010936 (Oracle SQL 1521)  2010937 (mySQL 3306)  2010939 (PostgreSQL 5432)
+    Comparação pelo ID: a comparação pelo nome ("^ET SCAN") não disparou nos testes.
+  -->
+  <rule id="100101" level="8">
+    <if_sid>86601</if_sid>
+    <field name="alert.signature_id">^2001219$|^2003068$|^2002910$|^2018489$|^2010935$|^2010936$|^2010937$|^2010939$</field>
+    <description>Suricata: varredura de rede detectada - $(alert.signature)</description>
+    <mitre>
+      <id>T1046</id>
+    </mitre>
+    <group>reconhecimento,</group>
+  </rule>
+
+  <!--
+    100102 - Correlação: 5 alertas da 100101 do mesmo IP de origem em 120 segundos.
+    Um alerta de varredura isolado pode ser ruído; vários do mesmo IP em pouco tempo indicam mapeamento da rede.
+  -->
+  <rule id="100102" level="12" frequency="5" timeframe="120">
+    <if_matched_sid>100101</if_matched_sid>
+    <same_field>src_ip</same_field>
+    <description>Suricata: varredura insistente - varios alertas de varredura do mesmo IP em 2 minutos ($(src_ip))</description>
+    <mitre>
+      <id>T1046</id>
+    </mitre>
+    <group>reconhecimento,correlacao,</group>
   </rule>
 
 </group>
