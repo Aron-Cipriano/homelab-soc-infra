@@ -44,8 +44,9 @@
   <!--
     100102 - Correlação: 5 alertas da 100101 do mesmo IP de origem em 120 segundos.
     Um alerta de varredura isolado pode ser ruído; vários do mesmo IP em pouco tempo indicam mapeamento da rede.
+    ignore="300": depois de disparar, a regra fica 5 minutos sem gerar novo alerta (um alerta por varredura).
   -->
-  <rule id="100102" level="12" frequency="5" timeframe="120">
+  <rule id="100102" level="12" frequency="5" timeframe="120" ignore="300">
     <if_matched_sid>100101</if_matched_sid>
     <same_field>src_ip</same_field>
     <description>Suricata: varredura insistente - varios alertas de varredura do mesmo IP em 2 minutos ($(src_ip))</description>
@@ -53,6 +54,22 @@
       <id>T1046</id>
     </mitre>
     <group>reconhecimento,correlacao,</group>
+  </rule>
+
+  <!--
+    100103 - Usuario criado com shell de login (persistencia).
+    A 5902 (usuario criado, nivel 8) dispara para qualquer conta. Contas de servico usam
+    /usr/sbin/nologin ou /bin/false; uma conta com shell interativo permite login e e o
+    que um invasor cria para voltar ao sistema.
+  -->
+  <rule id="100103" level="10">
+    <if_sid>5902</if_sid>
+    <match>shell=/bin/bash|shell=/usr/bin/bash|shell=/bin/sh|shell=/usr/bin/sh|shell=/bin/zsh|shell=/usr/bin/zsh</match>
+    <description>Usuario criado com shell de login (possivel persistencia)</description>
+    <mitre>
+      <id>T1136.001</id>
+    </mitre>
+    <group>persistencia,</group>
   </rule>
 
 </group>
