@@ -1,0 +1,38 @@
+title: Varredura de rede detectada pelo Suricata
+id: 269c6cf3-4686-4fa9-a436-3cb6441a4ecc
+name: suricata_varredura_de_rede
+status: experimental
+description: |
+  Detecta assinaturas ET SCAN observadas no laboratorio (SSH, VNC, bancos de dados
+  e deteccao de sistema operacional). Equivalente a regra 100101 do Wazuh.
+references:
+  - https://github.com/Aron-Cipriano/homelab-soc-infra/blob/main/writeups/05-wazuh-correlacao-varredura.md
+author: Aron Cipriano
+date: 2026-11-18
+tags:
+  - attack.discovery
+  - attack.t1046
+logsource:
+  product: suricata
+  service: alert
+detection:
+  selection:
+    event_type: alert
+    alert.signature_id:
+      - 2001219
+      - 2003068
+      - 2002910
+      - 2018489
+      - 2010935
+      - 2010936
+      - 2010937
+      - 2010939
+  condition: selection
+fields:
+  - src_ip
+  - dest_ip
+  - alert.signature
+falsepositives:
+  - Scanners de vulnerabilidade e ferramentas de inventario da equipe de TI
+  - Monitoramento que testa varias portas em sequencia
+level: medium

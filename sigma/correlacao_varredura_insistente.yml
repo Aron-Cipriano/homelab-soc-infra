@@ -1,0 +1,20 @@
+title: Varredura insistente - varios alertas de varredura do mesmo IP em 2 minutos
+id: dbe9a42d-7c33-4617-ba01-042cc48a52e5
+status: experimental
+description: |
+  Regra de correlacao: 5 ou mais alertas de varredura do mesmo IP de origem em 2 minutos.
+  Equivalente a regra 100102 do Wazuh (frequency 5, timeframe 120, same_field src_ip).
+author: Aron Cipriano
+date: 2026-11-18
+correlation:
+  type: event_count
+  rules:
+    - suricata_varredura_de_rede
+  group-by:
+    - src_ip
+  timespan: 2m
+  condition:
+    gte: 5
+falsepositives:
+  - Scanners de vulnerabilidade agendados
+level: high

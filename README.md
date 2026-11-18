@@ -183,7 +183,8 @@ Arquivo: [`wazuh/rules/local_rules.xml`](wazuh/rules/local_rules.xml)
 |---|---|---|---|
 | 100100 | 10 | Assinaturas 2100498 e 2019284: saída do comando `id` com root no tráfego (possível pós-exploração) | T1033 |
 | 100101 | 8 | 8 assinaturas de varredura do ET (SSH, VNC, bancos de dados, detecção de SO) | T1046 |
-| 100102 | 12 | Correlação: 5 alertas da 100101 do mesmo `src_ip` em 120 segundos | T1046 |
+| 100102 | 12 | Correlação: 5 alertas da 100101 do mesmo `src_ip` em 120 segundos, com `ignore` de 5 minutos | T1046 |
+| 100103 | 10 | Usuário criado com shell de login (filha da 5902) | T1136.001 |
 
 As regras comparam pelo `alert.signature_id`. A comparação pelo nome da assinatura não disparou nos testes, e o ID é mais estável.
 
@@ -204,20 +205,27 @@ Cada regra é testada antes com `wazuh-logtest` e depois com tráfego real.
 
 ### Resultado da correlação
 
-Uma varredura com Nmap a partir da vm-wazuh gerou 18 alertas da 100101 (nível 8) e 4 da 100102 (nível 12). O ajuste previsto é o atributo `ignore` na 100102, para gerar um único alerta por varredura.
+Uma varredura com Nmap a partir da vm-wazuh gerou 18 alertas da 100101 (nível 8) e 4 da 100102 (nível 12). Com o atributo `ignore="300"` na 100102, a mesma varredura passou a gerar 21 alertas da 100101 e só 1 da 100102 ([write-up 06](writeups/06-wazuh-host-fim-usuario.md)).
 
 | Alertas de nível 12 no Dashboard | Alertas da regra 100102 |
 |---|---|
 | ![Nível 12](Imagens/wazuh-nivel12.png) | ![Correlação 100102](Imagens/wazuh-correlacao-100102.png) |
 
+### Detecções de host
+
+- **FIM em tempo real no `/etc`** da vm-agente (`realtime` e `report_changes`): uma alteração no `/etc/hosts` gera a regra 550 em segundos, com o diff da mudança.
+- **Criação de usuário:** conta com shell de login sobe para nível 10 (100103), conta de serviço com `nologin` continua em nível 8 (5902).
+
 ### Write-ups
 
 | # | Título |
 |---|---|
+| 01 | [Detecção de resposta de comando com privilégio de root](writeups/01-suricata-id-root.md) |
 | 02 | [Varredura de rede interna e o papel do EXTERNAL_NET](writeups/02-suricata-varredura-nmap.md) |
 | 03 | [Primeira triagem no SIEM e a linha de base do ambiente](writeups/03-wazuh-linha-de-base.md) |
 | 04 | [Regra local no Wazuh para priorizar um alerta do Suricata](writeups/04-wazuh-regra-local-100100.md) |
 | 05 | [Detecção de varredura e regra de correlação no Wazuh](writeups/05-wazuh-correlacao-varredura.md) |
+| 06 | [Ajuste da correlação, FIM em tempo real e criação de usuário com shell](writeups/06-wazuh-host-fim-usuario.md) |
 
 ## Problemas resolvidos
 
@@ -321,7 +329,7 @@ Uma varredura com Nmap a partir da vm-wazuh gerou 18 alertas da 100101 (nível 8
 - VM base limpa com snapshot, usada para criar todos os clones
 - Clones completos com novos endereços MAC e novo `machine-id`
 - Hostname próprio em cada VM
-- Snapshots a cada marco validado (`rede-ok`, `fase1-zabbix-grafana-ok`, `fase1-agente-ok`, `fase0-ip-fixo`, `fase4-correlacao`)
+- Snapshots a cada marco validado (`rede-ok`, `fase1-zabbix-grafana-ok`, `fase1-agente-ok`, `fase0-ip-fixo`, `fase4-correlacao`, `fase4-host`)
 - IPs fixos via netplan e DHCP da Host-Only desligado
 - MAC único em cada placa de rede dos clones
 - Acesso por SSH com chave ed25519 e aliases no `~/.ssh/config` (`wazuh`, `agente`, `zabbix`), sem digitar senha
@@ -342,9 +350,9 @@ Uma varredura com Nmap a partir da vm-wazuh gerou 18 alertas da 100101 (nível 8
 - [x] IPs fixos, DHCP da Host-Only desligado e MACs únicos
 - [x] Suricata na vm-agente com regras ET Open e leitura do `eve.json`
 - [x] Wazuh all-in-one na vm-wazuh, com o agente lendo os alertas do Suricata
-- [x] Regras locais com mapeamento no MITRE ATT&CK (T1033, T1046) e correlação
-- [x] Write-ups 02 a 05
-- [ ] Ajuste da 100102 com `ignore` e testes de host (força bruta no SSH, FIM em `/etc`, criação de usuário)
+- [x] Regras locais com mapeamento no MITRE ATT&CK (T1033, T1046, T1136.001) e correlação
+- [x] Write-ups 01 a 06
+- [x] Ajuste da 100102 com `ignore`, FIM em tempo real no `/etc` e detecção de usuário criado com shell
 - [ ] Regras Sigma
 - [ ] Zabbix monitorando a vm-wazuh
 - [ ] pfSense com VLANs e IDS/IPS
@@ -380,7 +388,6 @@ Uma varredura com Nmap a partir da vm-wazuh gerou 18 alertas da 100101 (nível 8
 
 ## Próximos passos
 
-- **Fase 4 (continuação):** `ignore` na 100102 e detecções de host: força bruta no SSH (T1110), alteração de arquivos em `/etc` e criação de usuário com shell
 - **Fase 5:** regras Sigma para registrar as detecções em formato padrão
 - **Fase 6:** Zabbix monitorando a vm-wazuh
 - **Fase 7:** pfSense com VLANs e IDS/IPS, com um notebook externo como atacante

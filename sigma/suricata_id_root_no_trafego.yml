@@ -1,0 +1,27 @@
+title: Saida do comando id com privilegio de root no trafego de rede
+id: 5fb75ed9-85c2-4188-92dd-9461050fc14d
+status: experimental
+description: |
+  Detecta alertas do Suricata para a saida do comando "id" com uid=0 trafegando na rede,
+  sinal de que um invasor confirmou privilegio de root numa sessao remota.
+  Equivalente a regra 100100 do Wazuh.
+references:
+  - https://github.com/Aron-Cipriano/homelab-soc-infra/blob/main/writeups/04-wazuh-regra-local-100100.md
+author: Aron Cipriano
+date: 2026-11-18
+tags:
+  - attack.discovery
+  - attack.t1033
+logsource:
+  product: suricata
+  service: alert
+detection:
+  selection:
+    event_type: alert
+    alert.signature_id:
+      - 2100498
+      - 2019284
+  condition: selection
+falsepositives:
+  - Ferramentas de administracao que executam "id" em sessoes de texto puro (sem criptografia)
+level: high

@@ -1,0 +1,9 @@
+name: Campos do Suricata no indice do Wazuh
+priority: 100
+transformations:
+  - id: prefixo_data
+    type: field_name_prefix
+    prefix: "data."
+    rule_conditions:
+      - type: logsource
+        product: suricata

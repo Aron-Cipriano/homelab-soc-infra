@@ -1,0 +1,32 @@
+title: Usuario local criado com shell de login
+id: ba5e0b83-1851-408e-99f9-a4512741dc27
+status: experimental
+description: |
+  Detecta a criacao de um usuario com shell interativo pelo useradd.
+  Contas de servico usam nologin ou false; uma conta com shell permite login
+  e e o tipo de conta que um invasor cria para manter acesso.
+  Equivalente a regra 100103 do Wazuh.
+references:
+  - https://github.com/Aron-Cipriano/homelab-soc-infra/blob/main/writeups/06-wazuh-host-fim-usuario.md
+author: Aron Cipriano
+date: 2026-11-18
+tags:
+  - attack.persistence
+  - attack.t1136.001
+logsource:
+  product: linux
+  service: auth
+detection:
+  keywords_criacao:
+    - 'new user:'
+  keywords_shell:
+    - 'shell=/bin/bash'
+    - 'shell=/usr/bin/bash'
+    - 'shell=/bin/sh'
+    - 'shell=/usr/bin/sh'
+    - 'shell=/bin/zsh'
+    - 'shell=/usr/bin/zsh'
+  condition: keywords_criacao and keywords_shell
+falsepositives:
+  - Criacao de conta para um novo funcionario ou administrador, com pedido aprovado
+level: medium

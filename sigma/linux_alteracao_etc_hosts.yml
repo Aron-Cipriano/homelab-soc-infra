@@ -1,0 +1,25 @@
+title: Alteracao do arquivo /etc/hosts
+id: 7cda69fa-6023-41d4-bac5-1d9ee130d0b9
+status: experimental
+description: |
+  Detecta alteracao do /etc/hosts, usada para redirecionar nomes de dominio
+  (por exemplo, desviar atualizacoes ou o acesso a um servidor).
+  No laboratorio, a deteccao vem do FIM do Wazuh (regra 550) com realtime no /etc.
+references:
+  - https://github.com/Aron-Cipriano/homelab-soc-infra/blob/main/writeups/06-wazuh-host-fim-usuario.md
+author: Aron Cipriano
+date: 2026-11-18
+tags:
+  - attack.impact
+  - attack.t1565.001
+logsource:
+  product: linux
+  category: file_change
+detection:
+  selection:
+    TargetFilename: /etc/hosts
+  condition: selection
+falsepositives:
+  - Mudancas planejadas pela equipe de TI
+  - Ferramentas de gerenciamento de configuracao (Ansible, Puppet)
+level: medium
